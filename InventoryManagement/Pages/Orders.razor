@@ -1,0 +1,85 @@
+@page "/orders"
+@using Northwind
+@using Models.Northwind
+@inject INorthwindService NorthwindService
+
+<div class="row-layout orders-container">
+    <div class="column-layout group">
+        <div class="column-layout group_1">
+            <div class="row-layout group_2">
+                <h6 class="h6">
+                    Orders
+                </h6>
+                <div class="row-layout group_3">
+                    <IgbButton DisplayType="ButtonBaseType.Button" class="button button_1" orders-scope>
+                        <span class="material-icons icon">
+                            add
+                        </span>
+                        <span>New Order</span>
+                        <IgbRipple></IgbRipple>
+                    </IgbButton>
+                    <IgbButton Variant="ButtonVariant.Outlined" DisplayType="ButtonBaseType.Button" class="button" orders-scope>
+                        <span class="material-icons">
+                            picture_as_pdf
+                        </span>
+                        <span>Download PDF</span>
+                        <IgbRipple></IgbRipple>
+                    </IgbButton>
+                    <IgbButton Variant="ButtonVariant.Outlined" DisplayType="ButtonBaseType.Button" class="button" orders-scope>
+                        <span class="material-icons">
+                            print
+                        </span>
+                        <span>Print</span>
+                        <IgbRipple></IgbRipple>
+                    </IgbButton>
+                </div>
+            </div>
+            <div class="row-layout group_4">
+                <div class="row-layout group_5">
+                    <IgbInput Label="Search orders" Outlined="false" class="input" orders-scope>
+                        <span slot="prefix">
+                            <span class="material-icons icon_1">
+                                search
+                            </span>
+                        </span>
+                    </IgbInput>
+                    <IgbButton Variant="ButtonVariant.Outlined" DisplayType="ButtonBaseType.Button" class="button" orders-scope>
+                        <span class="material-icons">
+                            filter_alt
+                        </span>
+                        <span>Filter</span>
+                        <IgbRipple></IgbRipple>
+                    </IgbButton>
+                </div>
+            </div>
+            <div class="row-layout group_6">
+                <IgbGrid Data="@_northwindOrders" PrimaryKey="EmployeeID" AllowFiltering="true" FilterMode="FilterMode.ExcelStyleFilter" class="ig-typography grid" orders-scope>
+                    <IgbColumn Field="OrderID" DataType="GridColumnDataType.Number" Header="orderID" Sortable="true" Selectable="false"></IgbColumn>
+                    <IgbColumn Field="CustomerID" DataType="GridColumnDataType.String" Header="customerID" Sortable="true" Selectable="false"></IgbColumn>
+                    <IgbColumn Field="EmployeeID" DataType="GridColumnDataType.Number" Header="employeeID" Sortable="true" Selectable="false"></IgbColumn>
+                    <IgbColumn Field="OrderDate" DataType="GridColumnDataType.Date" Header="orderDate" Sortable="true" Selectable="false"></IgbColumn>
+                    <IgbColumn Field="RequiredDate" DataType="GridColumnDataType.Date" Header="requiredDate" Sortable="true" Selectable="false"></IgbColumn>
+                    <IgbColumn Field="ShippedDate" DataType="GridColumnDataType.Date" Header="shippedDate" Sortable="true" Selectable="false"></IgbColumn>
+                    <IgbColumn Field="ShipVia" DataType="GridColumnDataType.Number" Header="shipVia" Sortable="true" Selectable="false"></IgbColumn>
+                    <IgbColumn Field="Freight" DataType="GridColumnDataType.Number" Header="freight" Sortable="true" Selectable="false"></IgbColumn>
+                    <IgbColumn Field="ShipName" DataType="GridColumnDataType.String" Header="shipName" Sortable="true" Selectable="false"></IgbColumn>
+                    <IgbColumn Field="ShipAddress.Street" DataType="GridColumnDataType.String" Header="street" Sortable="true" Selectable="false"></IgbColumn>
+                    <IgbColumn Field="ShipAddress.City" DataType="GridColumnDataType.String" Header="city" Sortable="true" Selectable="false"></IgbColumn>
+                    <IgbColumn Field="ShipAddress.Region" DataType="GridColumnDataType.String" Header="region" Sortable="true" Selectable="false"></IgbColumn>
+                    <IgbColumn Field="ShipAddress.PostalCode" DataType="GridColumnDataType.String" Header="postalCode" Sortable="true" Selectable="false"></IgbColumn>
+                    <IgbColumn Field="ShipAddress.Country" DataType="GridColumnDataType.String" Header="country" Sortable="true" Selectable="false"></IgbColumn>
+                </IgbGrid>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<OrdersType> _northwindOrders = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _northwindOrders = await NorthwindService.GetOrders();
+        await base.OnInitializedAsync();
+    }
+}

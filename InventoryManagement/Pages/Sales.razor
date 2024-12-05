@@ -1,0 +1,52 @@
+@page "/sales"
+@using ECommerce
+@using Models.ECommerce
+@using System.Reactive.Linq
+@using System.Reactive.Subjects
+@inject IECommerceService ECommerceService
+@implements IDisposable;
+
+<div class="row-layout sales-container">
+    <div class="column-layout group">
+        <div class="column-layout group_1">
+            <div class="row-layout group_2">
+                <h6 class="h6">
+                    Sales
+                </h6>
+                <div class="row-layout group_3"></div>
+            </div>
+            <div class="row-layout group_4">
+                <div class="row-layout group_5">
+                    <IgbCombo Data="@_eCommerceRevenue" Label="Sales" Placeholder="Choose a month" DisplayKey="Month" Outlined="false" T="object" Change="ComboChange" class="combo" sales-scope></IgbCombo>
+                </div>
+            </div>
+            <div class="row-layout group_6">
+                <IgbCategoryChart ComputedPlotAreaMarginMode="ComputedPlotAreaMarginMode.Series" DataSource="@_revenue" class="category-chart" sales-scope></IgbCategoryChart>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<RevenueType> _eCommerceRevenue = new();
+    private List<RevenueType> _revenue = new();
+    private Subject<object> destroy = new();
+
+    public void ComboChange(IgbComboChangeEventArgs e)
+    {
+        ECommerceService.Revenue.OnNext(e.Detail.NewValue.Cast<RevenueType>().ToList());
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _eCommerceRevenue = await ECommerceService.GetRevenueList();
+        ECommerceService.Revenue.TakeUntil(this.destroy).Subscribe(x => { _revenue = x; InvokeAsync(StateHasChanged); });
+        await base.OnInitializedAsync();
+    }
+
+    public void Dispose()
+    {
+        this.destroy.OnNext(null);
+        this.destroy.Dispose();
+    }
+}

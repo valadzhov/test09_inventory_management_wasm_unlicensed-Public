@@ -1,0 +1,313 @@
+@page "/products"
+@using InventoryApp
+@using Models.InventoryApp
+@using ECommerce
+@using Models.ECommerce
+@using System.Reactive.Linq
+@using System.Reactive.Subjects
+@inject IInventoryAppService InventoryAppService
+@inject IECommerceService ECommerceService
+@implements IDisposable;
+
+<div class="column-layout products-container">
+    <div class="column-layout group">
+        <div class="row-layout group_1">
+            <h6 class="h6">
+                Products
+            </h6>
+            <div class="row-layout group_2">
+                <IgbButton DisplayType="ButtonBaseType.Button" @onclick="@(e => _addNewProduct!.ToggleAsync())" class="button button_3" products-scope>
+                    <span class="material-icons icon">
+                        add
+                    </span>
+                    <span>Add New Product</span>
+                    <IgbRipple></IgbRipple>
+                </IgbButton>
+                <IgbButton Variant="ButtonVariant.Outlined" DisplayType="ButtonBaseType.Button" class="button" products-scope>
+                    <span class="material-icons">
+                        import_export
+                    </span>
+                    <span>Import Product</span>
+                    <IgbRipple></IgbRipple>
+                </IgbButton>
+            </div>
+        </div>
+        <div class="row-layout group_1">
+            <div class="row-layout group_3">
+                <IgbSelect Outlined="false" Label="Department" Placeholder="Pick a Department" class="user-input" products-scope>
+                    <IgbSelectItem Value="Option">
+                        Women
+                    </IgbSelectItem>
+                    <IgbSelectItem Value="Option">
+                        Men
+                    </IgbSelectItem>
+                    <IgbSelectItem Value="Option">
+                        Children
+                    </IgbSelectItem>
+                </IgbSelect>
+                <IgbCombo Data="@_inventoryAppProducts" Label="Category" Placeholder="Choose categories" DisplayKey="Product" GroupKey="Department" Outlined="false" T="object" Change="ComboChange" class="user-input" products-scope></IgbCombo>
+                <IgbInput Label="Search" Outlined="false" class="user-input" products-scope>
+                    <span slot="prefix">
+                        <span class="material-icons icon_1">
+                            search
+                        </span>
+                    </span>
+                </IgbInput>
+            </div>
+            <IgbButton Variant="ButtonVariant.Flat" DisplayType="ButtonBaseType.Button" @ref="_button" @onclick="@(e => _dropdown!.ToggleAsync(_button))" class="button" products-scope>
+                <span>Sort By</span>
+                <span class="material-icons">
+                    keyboard_arrow_down
+                </span>
+                <IgbRipple></IgbRipple>
+            </IgbButton>
+            <IgbDropdown @ref="_dropdown" class="dropdown" products-scope>
+                <IgbDropdownItem>
+                    Alphabetically
+                </IgbDropdownItem>
+                <IgbDropdownItem>
+                    Recently Added
+                </IgbDropdownItem>
+            </IgbDropdown>
+        </div>
+        <div class="row-layout products">
+            @foreach (var item in _products)
+            {
+                <IgbCard class="card" products-scope>
+                    <IgbCardMedia class="media-content" products-scope>
+                        <img src="@item.ImageURL" class="image" />
+                    </IgbCardMedia>
+                    <IgbCardHeader>
+                        <h3 slot="title">
+                            @item.Product
+                        </h3>
+                        <h5 slot="subtitle">
+                            @item.Department
+                        </h5>
+                    </IgbCardHeader>
+                    <IgbCardContent class="body-content" products-scope>
+                        <p class="typography__body-2 text">
+                            Here you can add some description of the product in more details
+                        </p>
+                    </IgbCardContent>
+                    <IgbCardActions class="actions-content" products-scope>
+                        <IgbButton Variant="ButtonVariant.Outlined" DisplayType="ButtonBaseType.Button" slot="start" @onclick="@(e => _editProductDetails!.ToggleAsync())" class="button_1" products-scope>
+                            Edit
+                            <IgbRipple></IgbRipple>
+                        </IgbButton>
+                        <IgbIconButton slot="end" Variant="IconButtonVariant.Flat" class="icon-button" products-scope>
+                            <span class="material-icons icon_2">
+                                remove_red_eye
+                            </span>
+                            <IgbRipple></IgbRipple>
+                        </IgbIconButton>
+                        <IgbIconButton slot="end" Variant="IconButtonVariant.Flat" class="icon-button" products-scope>
+                            <span class="material-icons icon_2">
+                                delete
+                            </span>
+                            <IgbRipple></IgbRipple>
+                        </IgbIconButton>
+                    </IgbCardActions>
+                </IgbCard>
+            }
+        </div>
+    </div>
+    <IgbDialog CloseOnOutsideClick="true" @ref="_addNewProduct">
+        <h5 slot="title">
+            Add New Product
+        </h5>
+        <div class="column-layout group_4">
+            <div class="column-layout group_5">
+                <IgbInput Label="Product title" Placeholder="e.g Blue jeans" Outlined="false" class="user-input_2" products-scope></IgbInput>
+                <div class="row-layout group_5">
+                    <IgbSelect Outlined="false" Label="Department" Placeholder="Pick a Department" class="select" products-scope>
+                        <IgbSelectItem Value="1">
+                            Women's Clothing
+                        </IgbSelectItem>
+                        <IgbSelectItem Value="2">
+                            Men's Clothing
+                        </IgbSelectItem>
+                        <IgbSelectItem Value="3">
+                            Children's Clothing
+                        </IgbSelectItem>
+                    </IgbSelect>
+                    <IgbCombo Data="@_eCommerceSales" Label="Category" Placeholder="Choose categories" ValueKey="Item" DisplayKey="Item" Outlined="false" T="object" SingleSelect="true" class="single-select-combo" products-scope></IgbCombo>
+                </div>
+                <IgbTextarea Label="Product description" Placeholder="e.g.  Blue jeans, regular fit, 100% cotton" Outlined="false" class="user-input_2" products-scope></IgbTextarea>
+            </div>
+            <div class="column-layout group_6">
+                <p class="typography__subtitle-2 text">
+                    Images
+                </p>
+                <IgbButton Variant="ButtonVariant.Outlined" DisplayType="ButtonBaseType.Button" class="button_2" products-scope>
+                    <span class="material-icons">
+                        photo_camera
+                    </span>
+                    <span>Upload pictures</span>
+                    <IgbRipple></IgbRipple>
+                </IgbButton>
+            </div>
+            <div class="row-layout group_7">
+                <IgbInput DisplayType="InputType.Number" Label="Unit price" Outlined="false" class="user-input_1" products-scope></IgbInput>
+                <IgbInput DisplayType="InputType.Number" Label="Units in stock" Outlined="false" class="user-input_1" products-scope></IgbInput>
+                <IgbInput DisplayType="InputType.Number" Label="Product #" Outlined="false" class="user-input_1" products-scope></IgbInput>
+            </div>
+            <div class="column-layout group_6">
+                <p class="typography__subtitle-2 text">
+                    Select available sizes:
+                </p>
+                <div class="row-layout checkbox-group">
+                    <IgbCheckbox LabelPosition="CheckboxBaseLabelPosition.After" class="checkbox" products-scope>
+                        XS
+                    </IgbCheckbox>
+                    <IgbCheckbox LabelPosition="CheckboxBaseLabelPosition.After" class="checkbox" products-scope>
+                        S
+                    </IgbCheckbox>
+                    <IgbCheckbox LabelPosition="CheckboxBaseLabelPosition.After" class="checkbox" products-scope>
+                        M
+                    </IgbCheckbox>
+                    <IgbCheckbox LabelPosition="CheckboxBaseLabelPosition.After" class="checkbox" products-scope>
+                        L
+                    </IgbCheckbox>
+                    <IgbCheckbox LabelPosition="CheckboxBaseLabelPosition.After" class="checkbox" products-scope>
+                        XL
+                    </IgbCheckbox>
+                    <IgbCheckbox LabelPosition="CheckboxBaseLabelPosition.After" class="checkbox" products-scope>
+                        XXL
+                    </IgbCheckbox>
+                </div>
+            </div>
+            <div class="row-layout group_8">
+                <IgbButton DisplayType="ButtonBaseType.Button" @onclick="@(e => _addNewProduct!.ToggleAsync())" class="button button_4" products-scope>
+                    ADD PRODUCT
+                    <IgbRipple></IgbRipple>
+                </IgbButton>
+                <IgbButton Variant="ButtonVariant.Flat" DisplayType="ButtonBaseType.Button" @onclick="@(e => _addNewProduct!.ToggleAsync())" class="button" products-scope>
+                    CANCEL
+                    <IgbRipple></IgbRipple>
+                </IgbButton>
+            </div>
+        </div>
+        <div slot="footer"></div>
+    </IgbDialog>
+    <IgbDialog CloseOnOutsideClick="true" @ref="_editProductDetails">
+        <h5 slot="title">
+            Edit Product Details
+        </h5>
+        <div class="column-layout group_4">
+            <div class="column-layout group_5">
+                <IgbInput Label="Product title" Placeholder="e.g Blue jeans" Outlined="false" @bind-Value="@_value" class="user-input_2" products-scope></IgbInput>
+                <div class="row-layout group_5">
+                    <IgbSelect Outlined="false" Label="Department" Placeholder="Pick a Department" Value="@_value1" Change="@(e => _value1 = e.Detail.Value)" class="select" products-scope>
+                        <IgbSelectItem Value="1">
+                            Women's Clothing
+                        </IgbSelectItem>
+                        <IgbSelectItem Value="2">
+                            Men's Clothing
+                        </IgbSelectItem>
+                        <IgbSelectItem Value="3">
+                            Children's Clothing
+                        </IgbSelectItem>
+                    </IgbSelect>
+                    <IgbCombo Data="@_eCommerceSales" Label="Category" Placeholder="Choose categories" ValueKey="Item" DisplayKey="Item" Outlined="false" T="object" SingleSelect="true" class="single-select-combo" products-scope></IgbCombo>
+                </div>
+                <IgbTextarea Label="Product description" Placeholder="e.g.  Blue jeans, regular fit, 100% cotton" Outlined="false" @bind-Value="@_value2" class="user-input_2" products-scope></IgbTextarea>
+            </div>
+            <div class="column-layout group_6">
+                <p class="typography__subtitle-2 text">
+                    Images
+                </p>
+                <div class="row-layout group_5">
+                    <img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=880&q=80" class="image_1" />
+                    <img src="https://images.unsplash.com/photo-1622445272461-c6580cab8755?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=774&q=80" class="image_1" />
+                    <img src="https://images.unsplash.com/photo-1622445275463-afa2ab738c34?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=774&q=80" class="image_1" />
+                </div>
+                <IgbButton Variant="ButtonVariant.Outlined" DisplayType="ButtonBaseType.Button" class="button_2" products-scope>
+                    <span class="material-icons">
+                        photo_camera
+                    </span>
+                    <span>Upload pictures</span>
+                    <IgbRipple></IgbRipple>
+                </IgbButton>
+            </div>
+            <div class="column-layout group_6">
+                <p class="typography__subtitle-2 text">
+                    Select available sizes:
+                </p>
+                <div class="row-layout checkbox-group">
+                    <IgbCheckbox LabelPosition="CheckboxBaseLabelPosition.After" @bind-Checked="@_checked" class="checkbox" products-scope>
+                        XS
+                    </IgbCheckbox>
+                    <IgbCheckbox LabelPosition="CheckboxBaseLabelPosition.After" @bind-Checked="@_checked" class="checkbox" products-scope>
+                        S
+                    </IgbCheckbox>
+                    <IgbCheckbox LabelPosition="CheckboxBaseLabelPosition.After" @bind-Checked="@_checked" class="checkbox" products-scope>
+                        M
+                    </IgbCheckbox>
+                    <IgbCheckbox LabelPosition="CheckboxBaseLabelPosition.After" @bind-Checked="@_checked" class="checkbox" products-scope>
+                        L
+                    </IgbCheckbox>
+                    <IgbCheckbox LabelPosition="CheckboxBaseLabelPosition.After" @bind-Checked="@_checked" class="checkbox" products-scope>
+                        XL
+                    </IgbCheckbox>
+                    <IgbCheckbox LabelPosition="CheckboxBaseLabelPosition.After" class="checkbox" products-scope>
+                        XXL
+                    </IgbCheckbox>
+                </div>
+            </div>
+            <div class="row-layout group_7">
+                <IgbInput DisplayType="InputType.Number" Label="Unit price" Outlined="false" Value="@_value3.ToString()" Change="@(e => _value3 = double.Parse(e.Detail.ToString().ToString()))" class="user-input_1" products-scope></IgbInput>
+                <IgbInput DisplayType="InputType.Number" Label="Units in stock" Outlined="false" Value="@_value4.ToString()" Change="@(e => _value4 = double.Parse(e.Detail.ToString().ToString()))" class="user-input_1" products-scope></IgbInput>
+                <IgbInput Label="Product #" Outlined="false" @bind-Value="@_value5" class="user-input_1" products-scope></IgbInput>
+            </div>
+            <div class="row-layout group_8">
+                <IgbButton DisplayType="ButtonBaseType.Button" @onclick="@(e => _editProductDetails!.ToggleAsync())" class="button button_5" products-scope>
+                    UPDATE
+                    <IgbRipple></IgbRipple>
+                </IgbButton>
+                <IgbButton Variant="ButtonVariant.Flat" DisplayType="ButtonBaseType.Button" @onclick="@(e => _editProductDetails!.ToggleAsync())" class="button" products-scope>
+                    CANCEL
+                    <IgbRipple></IgbRipple>
+                </IgbButton>
+            </div>
+        </div>
+        <div slot="footer"></div>
+    </IgbDialog>
+</div>
+
+@code {
+    private IgbDialog _addNewProduct;
+    private IgbDropdown _dropdown;
+    private IgbDialog _editProductDetails;
+    private List<ProductsType> _inventoryAppProducts = new();
+    private IgbButton _button;
+    private List<ProductsType> _products = new();
+    private List<SalesType> _eCommerceSales = new();
+    private string _value = "Basic Tee";
+    private string _value1 = "2";
+    private string _value2 = "Here you can add some description of the product in more details";
+    private bool _checked = true;
+    private double _value3 = 15.99;
+    private double _value4 = 99;
+    private string _value5 = "M050";
+    private Subject<object> destroy = new();
+
+    public void ComboChange(IgbComboChangeEventArgs e)
+    {
+        InventoryAppService.Products.OnNext(e.Detail.NewValue.Cast<ProductsType>().ToList());
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _inventoryAppProducts = await InventoryAppService.GetProductsList();
+        InventoryAppService.Products.TakeUntil(this.destroy).Subscribe(x => { _products = x; InvokeAsync(StateHasChanged); });
+        _eCommerceSales = await ECommerceService.GetSalesList();
+        await base.OnInitializedAsync();
+    }
+
+    public void Dispose()
+    {
+        this.destroy.OnNext(null);
+        this.destroy.Dispose();
+    }
+}
